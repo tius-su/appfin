@@ -610,6 +610,7 @@
                     </div>
                 </div>
 
+                <!-- START: Kategori Tab Content -->
                 <div class="tab-pane fade" id="kategori">
                     <div class="row">
                         <div class="col-md-6">
@@ -667,6 +668,8 @@
                         </div>
                     </div>
                 </div>
+                <!-- END: Kategori Tab Content -->
+
                 <div class="tab-pane fade" id="laporan">
                     <div class="card mb-4">
                         <div class="card-header">
@@ -1026,6 +1029,7 @@ const firebaseConfig = {
             // Populate year dropdown for reports
             populateYearDropdown();
 
+            console.log("Loading categories..."); // Debugging log
             loadCategories(); // Load categories first for dropdowns
             loadTransactions();
             loadDebts();
@@ -1086,6 +1090,7 @@ const firebaseConfig = {
                 console.warn("No user logged in, cannot load categories.");
                 return;
             }
+            console.log("Attempting to load categories for UID:", currentUser.uid); // Debugging log
             db.ref("categories/" + currentUser.uid).on("value", snapshot => {
                 allCategories = [];
                 const kategoriSelect = document.getElementById('kategori');
@@ -1101,6 +1106,7 @@ const firebaseConfig = {
                 pengeluaranList.innerHTML = '';
 
                 if (snapshot.exists()) {
+                    console.log("Categories snapshot exists. Number of categories:", snapshot.numChildren()); // Debugging log
                     snapshot.forEach(child => {
                         const category = child.val();
                         allCategories.push({
@@ -1138,10 +1144,13 @@ const firebaseConfig = {
                         }
                     });
                 } else {
+                    console.log("Categories snapshot does NOT exist. Adding default categories."); // Debugging log
                     addDefaultCategories(); // Add default categories if none exist for this user
                     pemasukanList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
                     pengeluaranList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
                 }
+            }, (error) => {
+                console.error("Firebase categories read failed:", error); // Error handling for read
             });
         }
 
@@ -1163,24 +1172,24 @@ const firebaseConfig = {
                 { name: 'Kesehatan', type: 'pengeluaran' }
             ];
 
-            db.ref("categories/" + currentUser.uid).transaction((currentData) => {
-                if (currentData === null) {
-                    const updates = {};
-                    defaultCategories.forEach(category => {
-                        updates[db.ref("categories/" + currentUser.uid).push().key] = category;
-                    });
-                    return updates;
-                }
-                return undefined;
-            }, (error, committed, snapshot) => {
-                if (error) {
-                    console.error("Transaction failed abnormally!", error);
-                } else if (committed) {
-                    console.log("Default categories added successfully!");
-                } else {
-                    console.log("Default categories already exist, no new categories added.");
-                }
-            });
+            // Use .once() to check if categories already exist, then set them if not.
+            // This prevents the transaction from running repeatedly if categories are partially there.
+            db.ref("categories/" + currentUser.uid).once("value")
+                .then(snapshot => {
+                    if (!snapshot.exists() || snapshot.numChildren() === 0) {
+                        console.log("No categories found for user, adding default categories."); // Debugging log
+                        const updates = {};
+                        defaultCategories.forEach(category => {
+                            updates[db.ref("categories/" + currentUser.uid).push().key] = category;
+                        });
+                        db.ref("categories/" + currentUser.uid).update(updates)
+                            .then(() => console.log("Default categories added successfully!"))
+                            .catch(error => console.error("Error adding default categories:", error));
+                    } else {
+                        console.log("Categories already exist for user, skipping default category addition."); // Debugging log
+                    }
+                })
+                .catch(error => console.error("Error checking for existing categories:", error));
         }
 
         // Add a new category
@@ -1198,9 +1207,14 @@ const firebaseConfig = {
                 db.ref("categories/" + currentUser.uid).push({
                     name: name,
                     type: type
+                })
+                .then(() => {
+                    e.target.reset();
+                    showMessageBox('Kategori berhasil ditambahkan!', 'success');
+                })
+                .catch(error => {
+                    showMessageBox('Gagal menambahkan kategori: ' + error.message, 'danger');
                 });
-                e.target.reset();
-                showMessageBox('Kategori berhasil ditambahkan!', 'success');
             } else {
                 showMessageBox('Nama kategori tidak boleh kosong!', 'warning');
             }
@@ -1227,11 +1241,15 @@ const firebaseConfig = {
                 db.ref("categories/" + currentUser.uid + "/" + id).update({
                     name: name,
                     type: type
+                })
+                .then(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
+                    modal.hide();
+                    showMessageBox('Kategori berhasil diperbarui!', 'success');
+                })
+                .catch(error => {
+                    showMessageBox('Gagal memperbarui kategori: ' + error.message, 'danger');
                 });
-
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
-                modal.hide();
-                showMessageBox('Kategori berhasil diperbarui!', 'success');
             } else {
                 showMessageBox('Nama kategori tidak boleh kosong!', 'warning');
             }
