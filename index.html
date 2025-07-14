@@ -183,42 +183,53 @@
             }
         }
 
-        /* DEBUG CSS: Tambahkan ini sementara untuk melihat elemen kategori */
+        /* DEBUG CSS: Ini adalah CSS debug yang sangat agresif */
         /* Ini akan memberikan border dan latar belakang pada area daftar kategori */
         #daftarKategoriPemasukan,
         #daftarKategoriPengeluaran {
-            border: 2px solid red !important; /* Border merah agar terlihat jelas */
-            min-height: 100px !important; /* Pastikan ada tinggi minimum */
-            background-color: #f0f0f0 !important; /* Warna latar belakang agar terlihat jelas */
-            padding: 10px !important; /* Tambahkan padding agar konten tidak menempel */
+            border: 5px solid magenta !important; /* Border magenta yang sangat tebal */
+            min-height: 200px !important; /* Tinggi minimum yang lebih besar */
+            background-color: #ffcccc !important; /* Latar belakang merah muda yang mencolok */
+            padding: 20px !important; /* Tambahkan padding agar konten tidak menempel */
             box-sizing: border-box !important; /* Pastikan padding tidak menambah ukuran total */
+            visibility: visible !important; /* Pastikan terlihat */
+            opacity: 1 !important; /* Pastikan tidak transparan */
+            display: block !important; /* Pastikan ditampilkan sebagai blok */
         }
 
         /* Ini akan memberikan border dan memastikan setiap item list terlihat */
         #daftarKategoriPemasukan li,
         #daftarKategoriPengeluaran li {
-            border: 1px solid blue !important; /* Border biru untuk setiap item list */
-            padding: 10px !important; /* Padding agar konten tidak menempel */
+            border: 3px solid cyan !important; /* Border cyan yang mencolok untuk setiap item list */
+            padding: 15px !important; /* Padding yang lebih besar */
             color: black !important; /* Pastikan teks berwarna hitam */
-            margin-bottom: 5px !important; /* Spasi antar item */
+            margin-bottom: 10px !important; /* Spasi antar item yang lebih besar */
             display: flex !important; /* Pastikan display flex agar kontennya terlihat */
             justify-content: space-between !important; /* Rata kiri kanan */
             align-items: center !important; /* Pusatkan vertikal */
             background-color: white !important; /* Latar belakang putih untuk item list */
+            font-size: 1.2em !important; /* Ukuran font lebih besar */
+            font-weight: bold !important; /* Teks tebal */
         }
 
         /* Ini akan memberikan border pada form kategori */
         #formKategori {
-            border: 2px solid green !important;
-            padding: 15px !important;
-            background-color: #e6ffe6 !important;
+            border: 5px solid orange !important; /* Border orange yang sangat tebal */
+            padding: 25px !important;
+            background-color: #ffffcc !important; /* Latar belakang kuning muda */
+            visibility: visible !important;
+            opacity: 1 !important;
+            display: block !important;
         }
 
         /* Pastikan tab-pane kategori itu sendiri terlihat dan memiliki ruang */
         #kategori.tab-pane {
-            min-height: 400px !important; /* Beri tinggi minimum pada tab pane */
-            background-color: #f9f9f9 !important; /* Latar belakang berbeda untuk tab pane */
-            padding: 20px !important; /* Padding di dalam tab pane */
+            min-height: 600px !important; /* Beri tinggi minimum yang sangat besar pada tab pane */
+            background-color: #e0ffe0 !important; /* Latar belakang hijau muda yang mencolok */
+            padding: 30px !important; /* Padding di dalam tab pane */
+            visibility: visible !important;
+            opacity: 1 !important;
+            display: block !important;
         }
         /* END DEBUG CSS */
     </style>
