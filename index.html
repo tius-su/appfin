@@ -184,23 +184,41 @@
         }
 
         /* DEBUG CSS: Tambahkan ini sementara untuk melihat elemen kategori */
+        /* Ini akan memberikan border dan latar belakang pada area daftar kategori */
         #daftarKategoriPemasukan,
         #daftarKategoriPengeluaran {
-            border: 2px solid red !important; /* Tambahkan border merah agar terlihat */
+            border: 2px solid red !important; /* Border merah agar terlihat jelas */
             min-height: 100px !important; /* Pastikan ada tinggi minimum */
             background-color: #f0f0f0 !important; /* Warna latar belakang agar terlihat jelas */
             padding: 10px !important; /* Tambahkan padding agar konten tidak menempel */
+            box-sizing: border-box !important; /* Pastikan padding tidak menambah ukuran total */
         }
 
+        /* Ini akan memberikan border dan memastikan setiap item list terlihat */
         #daftarKategoriPemasukan li,
         #daftarKategoriPengeluaran li {
-            border: 1px solid blue !important; /* Border untuk setiap item list */
+            border: 1px solid blue !important; /* Border biru untuk setiap item list */
             padding: 10px !important; /* Padding agar konten tidak menempel */
             color: black !important; /* Pastikan teks berwarna hitam */
             margin-bottom: 5px !important; /* Spasi antar item */
             display: flex !important; /* Pastikan display flex agar kontennya terlihat */
             justify-content: space-between !important; /* Rata kiri kanan */
             align-items: center !important; /* Pusatkan vertikal */
+            background-color: white !important; /* Latar belakang putih untuk item list */
+        }
+
+        /* Ini akan memberikan border pada form kategori */
+        #formKategori {
+            border: 2px solid green !important;
+            padding: 15px !important;
+            background-color: #e6ffe6 !important;
+        }
+
+        /* Pastikan tab-pane kategori itu sendiri terlihat dan memiliki ruang */
+        #kategori.tab-pane {
+            min-height: 400px !important; /* Beri tinggi minimum pada tab pane */
+            background-color: #f9f9f9 !important; /* Latar belakang berbeda untuk tab pane */
+            padding: 20px !important; /* Padding di dalam tab pane */
         }
         /* END DEBUG CSS */
     </style>
@@ -1359,8 +1377,8 @@
 
                             updateMonthlyChart();
                         } else {
-                            recentTbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Tidak ada data transaksi</td></tr>';
-                            fullTbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Tidak ada data transaksi</td></tr>';
+                            recentTbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">Tidak ada data transaksi</td></tr>';
+                            fullTbody.innerHTML = '<tr><td colspan="6" class="text-center py-3">Tidak ada data transaksi</td></tr>';
                             document.getElementById('sumIn').textContent = formatCurrency(0);
                             document.getElementById('sumOut').textContent = formatCurrency(0);
                             document.getElementById('saldo').textContent = formatCurrency(0);
@@ -1540,7 +1558,7 @@
                             tbody.appendChild(row);
                         });
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Tidak ada data yang sesuai dengan filter</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3">Tidak ada data yang sesuai dengan filter</td></tr>';
                     }
                 }
 
@@ -1598,8 +1616,8 @@
 
                             updateMonthlyChart();
                         } else {
-                            recentTbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Tidak ada data hutang/piutang</td></tr>';
-                            fullTbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Tidak ada data hutang/piutang</td></tr>';
+                            recentTbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">Tidak ada data hutang/piutang</td></tr>';
+                            fullTbody.innerHTML = '<tr><td colspan="7" class="text-center py-3">Tidak ada data hutang/piutang</td></tr>';
                         }
                     });
                 }
@@ -2007,7 +2025,7 @@
 
                         data.forEach(monthData => {
                             const income = monthData.pemasukan || 0;
-                            const expense = monthData.pengeluaran || 0;
+                            const expense = monthData.pemasukan || 0;
                             const balance = income - expense;
 
                             totalIncome += income;
