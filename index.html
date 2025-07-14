@@ -1029,7 +1029,7 @@ const firebaseConfig = {
             // Populate year dropdown for reports
             populateYearDropdown();
 
-            console.log("Loading categories..."); // Debugging log
+            console.log("DEBUG: loadAppData() - Memuat kategori...");
             loadCategories(); // Load categories first for dropdowns
             loadTransactions();
             loadDebts();
@@ -1087,10 +1087,10 @@ const firebaseConfig = {
         // Load all categories from Firebase
         function loadCategories() {
             if (!currentUser) {
-                console.warn("No user logged in, cannot load categories.");
+                console.warn("DEBUG: loadCategories() - Tidak ada pengguna yang login, tidak dapat memuat kategori.");
                 return;
             }
-            console.log("Attempting to load categories for UID:", currentUser.uid); // Debugging log
+            console.log("DEBUG: loadCategories() - Mencoba memuat kategori untuk UID:", currentUser.uid);
             db.ref("categories/" + currentUser.uid).on("value", snapshot => {
                 allCategories = [];
                 const kategoriSelect = document.getElementById('kategori');
@@ -1105,8 +1105,10 @@ const firebaseConfig = {
                 pemasukanList.innerHTML = '';
                 pengeluaranList.innerHTML = '';
 
-                if (snapshot.exists()) {
-                    console.log("Categories snapshot exists. Number of categories:", snapshot.numChildren()); // Debugging log
+                console.log("DEBUG: loadCategories() - Snapshot kategori:", snapshot.val());
+
+                if (snapshot.exists() && snapshot.numChildren() > 0) {
+                    console.log("DEBUG: loadCategories() - Snapshot kategori ADA. Jumlah kategori:", snapshot.numChildren());
                     snapshot.forEach(child => {
                         const category = child.val();
                         allCategories.push({
@@ -1144,13 +1146,13 @@ const firebaseConfig = {
                         }
                     });
                 } else {
-                    console.log("Categories snapshot does NOT exist. Adding default categories."); // Debugging log
+                    console.log("DEBUG: loadCategories() - Snapshot kategori KOSONG atau TIDAK ADA. Menambahkan kategori default.");
                     addDefaultCategories(); // Add default categories if none exist for this user
                     pemasukanList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
                     pengeluaranList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
                 }
             }, (error) => {
-                console.error("Firebase categories read failed:", error); // Error handling for read
+                console.error("DEBUG: Firebase categories read FAILED:", error); // Error handling for read
             });
         }
 
@@ -1177,19 +1179,19 @@ const firebaseConfig = {
             db.ref("categories/" + currentUser.uid).once("value")
                 .then(snapshot => {
                     if (!snapshot.exists() || snapshot.numChildren() === 0) {
-                        console.log("No categories found for user, adding default categories."); // Debugging log
+                        console.log("DEBUG: addDefaultCategories() - Tidak ada kategori ditemukan untuk pengguna, menambahkan kategori default.");
                         const updates = {};
                         defaultCategories.forEach(category => {
                             updates[db.ref("categories/" + currentUser.uid).push().key] = category;
                         });
                         db.ref("categories/" + currentUser.uid).update(updates)
-                            .then(() => console.log("Default categories added successfully!"))
-                            .catch(error => console.error("Error adding default categories:", error));
+                            .then(() => console.log("DEBUG: addDefaultCategories() - Kategori default berhasil ditambahkan!"))
+                            .catch(error => console.error("DEBUG: addDefaultCategories() - Error saat menambahkan kategori default:", error));
                     } else {
-                        console.log("Categories already exist for user, skipping default category addition."); // Debugging log
+                        console.log("DEBUG: addDefaultCategories() - Kategori sudah ada untuk pengguna, melewati penambahan kategori default.");
                     }
                 })
-                .catch(error => console.error("Error checking for existing categories:", error));
+                .catch(error => console.error("DEBUG: addDefaultCategories() - Error saat memeriksa kategori yang ada:", error));
         }
 
         // Add a new category
