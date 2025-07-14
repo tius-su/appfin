@@ -956,13 +956,13 @@ const firebaseConfig = {
             if (user) {
                 // User is signed in.
                 currentUser = user;
-                // console.log("User logged in."); // UID HIDDEN
+                console.log("DEBUG: onAuthStateChanged - Pengguna login dengan UID:", currentUser.uid); // Log UID
                 showApp();
                 loadAppData(); // Load data for the logged-in user
             } else {
                 // User is signed out.
                 currentUser = null;
-                // console.log("User logged out."); // UID HIDDEN
+                console.log("DEBUG: onAuthStateChanged - Pengguna logout.");
                 showLogin();
             }
         });
@@ -1019,7 +1019,12 @@ const firebaseConfig = {
 
         // Load all data specific to the current user
         function loadAppData() {
-            if (!currentUser) return; // Ensure user is logged in
+            if (!currentUser) {
+                console.warn("DEBUG: loadAppData() - Tidak ada pengguna yang login, tidak dapat memuat data aplikasi.");
+                return; // Pastikan currentUser ada sebelum memuat data
+            }
+
+            console.log("DEBUG: loadAppData() - Memuat data aplikasi untuk UID:", currentUser.uid);
 
             // Set default date to today
             const today = new Date().toISOString().split('T')[0];
@@ -1045,6 +1050,15 @@ const firebaseConfig = {
 
             // Initialize charts
             initMonthlyChart();
+
+            // Tambahkan event listener untuk tab Kategori
+            const kategoriTabLink = document.querySelector('#tabMenu a[href="#kategori"]');
+            if (kategoriTabLink) {
+                kategoriTabLink.addEventListener('shown.bs.tab', function (event) {
+                    console.log("DEBUG: Event 'shown.bs.tab' terpicu untuk Kategori. Memuat ulang kategori.");
+                    loadCategories(); // Paksa memuat ulang kategori saat tab Kategori diaktifkan
+                });
+            }
         });
 
         // Switch between tabs programmatically
@@ -1099,13 +1113,14 @@ const firebaseConfig = {
                 const pemasukanList = document.getElementById('daftarKategoriPemasukan');
                 const pengeluaranList = document.getElementById('daftarKategoriPengeluaran');
 
+                // Kosongkan dulu semua dropdown dan list
                 kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
                 filterKategoriSelect.innerHTML = '<option value="">Semua</option>';
                 editKategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
                 pemasukanList.innerHTML = '';
                 pengeluaranList.innerHTML = '';
 
-                console.log("DEBUG: loadCategories() - Snapshot kategori:", snapshot.val());
+                console.log("DEBUG: loadCategories() - Isi snapshot kategori:", snapshot.val());
 
                 if (snapshot.exists() && snapshot.numChildren() > 0) {
                     console.log("DEBUG: loadCategories() - Snapshot kategori ADA. Jumlah kategori:", snapshot.numChildren());
@@ -1148,6 +1163,7 @@ const firebaseConfig = {
                 } else {
                     console.log("DEBUG: loadCategories() - Snapshot kategori KOSONG atau TIDAK ADA. Menambahkan kategori default.");
                     addDefaultCategories(); // Add default categories if none exist for this user
+                    // Tampilkan pesan "Tidak ada kategori" sementara jika belum ada data
                     pemasukanList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
                     pengeluaranList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
                 }
@@ -1174,24 +1190,29 @@ const firebaseConfig = {
                 { name: 'Kesehatan', type: 'pengeluaran' }
             ];
 
-            // Use .once() to check if categories already exist, then set them if not.
-            // This prevents the transaction from running repeatedly if categories are partially there.
+            // Use .once() to check if categories already exist.
+            // If they do, and are not empty, we don't add defaults.
+            // If they don't exist, or are empty, we add them.
             db.ref("categories/" + currentUser.uid).once("value")
                 .then(snapshot => {
                     if (!snapshot.exists() || snapshot.numChildren() === 0) {
-                        console.log("DEBUG: addDefaultCategories() - Tidak ada kategori ditemukan untuk pengguna, menambahkan kategori default.");
+                        console.log("DEBUG: addDefaultCategories() - Menambahkan kategori default karena tidak ada data atau kosong.");
                         const updates = {};
                         defaultCategories.forEach(category => {
+                            // Firebase push generates a unique key
                             updates[db.ref("categories/" + currentUser.uid).push().key] = category;
                         });
                         db.ref("categories/" + currentUser.uid).update(updates)
-                            .then(() => console.log("DEBUG: addDefaultCategories() - Kategori default berhasil ditambahkan!"))
-                            .catch(error => console.error("DEBUG: addDefaultCategories() - Error saat menambahkan kategori default:", error));
+                            .then(() => {
+                                console.log("DEBUG: Kategori default berhasil ditambahkan.");
+                                // loadCategories() will be triggered by the .on("value") listener
+                            })
+                            .catch(error => console.error("DEBUG: Gagal menambahkan kategori default:", error));
                     } else {
-                        console.log("DEBUG: addDefaultCategories() - Kategori sudah ada untuk pengguna, melewati penambahan kategori default.");
+                        console.log("DEBUG: Kategori sudah ada untuk pengguna, tidak menambahkan default.");
                     }
                 })
-                .catch(error => console.error("DEBUG: addDefaultCategories() - Error saat memeriksa kategori yang ada:", error));
+                .catch(error => console.error("DEBUG: Error saat memeriksa kategori yang ada:", error));
         }
 
         // Add a new category
