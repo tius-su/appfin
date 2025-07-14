@@ -955,7 +955,8 @@
                 currentUser = user;
                 console.log("User logged in:", currentUser.uid);
                 showApp();
-                loadAppData(); // Load data for the logged-in user
+        loadAppData();
+        showTab("kategoriTab"); // Load data for the logged-in user
             } else {
                 // User is signed out.
                 currentUser = null;
@@ -2433,5 +2434,96 @@
             };
         }
     </script>
+
+<!-- Tombol Migrasi Manual -->
+<button id="migrateBtn" style="position: fixed; bottom: 10px; right: 10px; padding: 10px 15px; background: red; color: white; border: none; border-radius: 5px; z-index:999;">
+  🔁 Pindah Kategori
+</button>
+
+<script>
+  document.getElementById("migrateBtn").addEventListener("click", function () {
+    if (!auth.currentUser) {
+      alert("Login dulu untuk memigrasikan data.");
+      return;
+    }
+
+    const uid = auth.currentUser.uid;
+    const rootRef = db.ref(uid); // Data lama
+    const targetRef = db.ref("categories/" + uid); // Target lokasi baru
+
+    rootRef.once("value").then(snapshot => {
+      if (!snapshot.exists()) {
+        alert("Tidak ada data kategori di root UID untuk dipindahkan.");
+        return;
+      }
+
+      const allData = snapshot.val();
+      const migrated = {};
+
+      for (let key in allData) {
+        const item = allData[key];
+        if (
+          typeof item === "object" &&
+          item.name &&
+          item.type &&
+          typeof item.name === "string" &&
+          typeof item.type === "string"
+        ) {
+          migrated[key] = item;
+        }
+      }
+
+      if (Object.keys(migrated).length === 0) {
+        alert("Tidak ditemukan data kategori valid untuk dipindahkan.");
+        return;
+      }
+
+      targetRef.update(migrated, (error) => {
+        if (error) {
+          alert("❌ Gagal memindahkan: " + error.message);
+        } else {
+          alert("✅ Berhasil memindahkan kategori ke: categories/" + uid);
+          document.getElementById("migrateBtn").remove();
+        }
+      });
+    });
+  });
+</script>
+
+
+<script>
+document.getElementById("formKategori").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const nama = document.getElementById("namaKategori").value.trim();
+  const jenis = document.getElementById("jenisKategori").value;
+
+  if (!auth.currentUser) {
+    alert("Harap login terlebih dahulu.");
+    return;
+  }
+
+  if (nama === "" || !jenis) {
+    alert("Isi semua field.");
+    return;
+  }
+
+  const uid = auth.currentUser.uid;
+  const kategoriBaru = {
+    name: nama,
+    type: jenis
+  };
+
+  db.ref("categories/" + uid).push(kategoriBaru, function (error) {
+    if (error) {
+      alert("Gagal menyimpan kategori: " + error.message);
+    } else {
+      alert("✅ Kategori berhasil disimpan.");
+      document.getElementById("formKategori").reset();
+    }
+  });
+});
+</script>
+
 </body>
 </html>
