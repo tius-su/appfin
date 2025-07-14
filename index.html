@@ -667,7 +667,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="tab-pane fade" id="laporan">
                     <div class="card mb-4">
                         <div class="card-header">
@@ -918,15 +917,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Firebase configuration - Replace with your actual Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyA0CqESggXkbi2X0A-Slx1W729NNBkYo2k", // GANTI DENGAN API KEY ANDA
-            authDomain: "financial-note-app.firebaseapp.com", // GANTI DENGAN AUTH DOMAIN ANDA
-            databaseURL: "https://financial-note-app-default-rtdb.asia-southeast1.firebasedatabase.app", // GANTI DENGAN DATABASE URL ANDA
-            projectId: "financial-note-app", // GANTI DENGAN PROJECT ID ANDA
-            storageBucket: "financial-note-app.firebasestorage.app", // GANTI DENGAN STORAGE BUCKET ANDA
-            messagingSenderId: "490596877043", // GANTI DENGAN MESSAGING SENDER ID ANDA
-            appId: "1:490596877043:web:fb826b2dc273ac5e28ed86" // GANTI DENGAN APP ID ANDA
-        };
+const firebaseConfig = {
+    apiKey: "AIzaSyA0CqESggXkbi2X0A-Slx1W729NNBkYo2k",
+    authDomain: "financial-note-app.firebaseapp.com",
+    databaseURL: "https://financial-note-app-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "financial-note-app",
+    storageBucket: "financial-note-app.firebasestorage.app",
+    messagingSenderId: "490596877043",
+    appId: "1:490596877043:web:fb826b2dc273ac5e28ed86"
+};
+
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -953,14 +953,13 @@
             if (user) {
                 // User is signed in.
                 currentUser = user;
-                console.log("User logged in:", currentUser.uid);
+                // console.log("User logged in."); // UID HIDDEN
                 showApp();
-        loadAppData();
-        showTab("kategoriTab"); // Load data for the logged-in user
+                loadAppData(); // Load data for the logged-in user
             } else {
                 // User is signed out.
                 currentUser = null;
-                console.log("User logged out.");
+                // console.log("User logged out."); // UID HIDDEN
                 showLogin();
             }
         });
@@ -1081,81 +1080,25 @@
             }
         }
 
-        // === FUNGSI BARU UNTUK MENGISI DROPDOWN DAN LIST KATEGORI ===
-        function populateCategoryDropdowns() {
-            const kategoriSelect = document.getElementById('kategori');
-            const filterKategoriSelect = document.getElementById('filterKategori');
-            const editKategoriSelect = document.getElementById('editKategori');
-
-            kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
-            filterKategoriSelect.innerHTML = '<option value="">Semua</option>';
-            editKategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
-
-            allCategories.forEach(category => {
-                const option1 = new Option(category.name, category.name);
-                const option2 = new Option(category.name, category.name);
-                const option3 = new Option(category.name, category.name);
-
-                kategoriSelect.add(option1);
-                filterKategoriSelect.add(option2);
-                editKategoriSelect.add(option3);
-            });
-        }
-
-        function renderCategoryLists() {
-            const pemasukanList = document.getElementById('daftarKategoriPemasukan');
-            const pengeluaranList = document.getElementById('daftarKategoriPengeluaran');
-
-            pemasukanList.innerHTML = '';
-            pengeluaranList.innerHTML = '';
-
-            if (allCategories.length === 0) {
-                pemasukanList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
-                pengeluaranList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
-                return;
-            }
-
-            allCategories.forEach(category => {
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-                listItem.innerHTML = `
-                    ${category.name}
-                    <div>
-                        <button onclick="showEditCategoryModal('${category.id}', '${category.name}', '${category.type}')" class="btn btn-sm btn-outline-primary me-1">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button onclick="deleteCategory('${category.id}')" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                `;
-
-                if (category.type === 'pemasukan') {
-                    pemasukanList.appendChild(listItem);
-                } else {
-                    pengeluaranList.appendChild(listItem);
-                }
-            });
-        }
-        // === AKHIR FUNGSI BARU ===
-
-
         // Load all categories from Firebase
         function loadCategories() {
-            // Ini akan membersihkan UI kategori saat user logout atau sedang memuat
-            const pemasukanList = document.getElementById('daftarKategoriPemasukan');
-            const pengeluaranList = document.getElementById('daftarKategoriPengeluaran');
-            pemasukanList.innerHTML = '<li class="list-group-item text-center py-3">Memuat data...</li>';
-            pengeluaranList.innerHTML = '<li class="list-group-item text-center py-3">Memuat data...</li>';
-            populateCategoryDropdowns(); // Panggil ini untuk mengosongkan dropdown saat belum ada user
-
             if (!currentUser) {
                 console.warn("No user logged in, cannot load categories.");
-                return; // Keluar jika tidak ada user
+                return;
             }
-
             db.ref("categories/" + currentUser.uid).on("value", snapshot => {
-                allCategories = []; // Reset allCategories setiap kali data berubah
+                allCategories = [];
+                const kategoriSelect = document.getElementById('kategori');
+                const filterKategoriSelect = document.getElementById('filterKategori');
+                const editKategoriSelect = document.getElementById('editKategori');
+                const pemasukanList = document.getElementById('daftarKategoriPemasukan');
+                const pengeluaranList = document.getElementById('daftarKategoriPengeluaran');
+
+                kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
+                filterKategoriSelect.innerHTML = '<option value="">Semua</option>';
+                editKategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
+                pemasukanList.innerHTML = '';
+                pengeluaranList.innerHTML = '';
 
                 if (snapshot.exists()) {
                     snapshot.forEach(child => {
@@ -1164,29 +1107,51 @@
                             id: child.key,
                             ...category
                         });
-                    });
-                    console.log("All categories loaded into allCategories array:", allCategories);
-                } else {
-                    // Jika tidak ada data di Firebase untuk user ini, tambahkan default
-                    addDefaultCategories();
-                    console.log("No categories found in DB for user, attempting to add defaults.");
-                }
 
-                // Panggil fungsi render setelah allCategories terisi (baik dari DB atau default)
-                populateCategoryDropdowns(); // Ini akan mengisi ulang dropdown dengan data sebenarnya
-                renderCategoryLists(); // Ini akan mengisi daftar kategori di tab
+                        // Populate transaction forms/filters
+                        const option1 = new Option(category.name, category.name);
+                        const option2 = new Option(category.name, category.name);
+                        const option3 = new Option(category.name, category.name);
+                        kategoriSelect.add(option1);
+                        filterKategoriSelect.add(option2);
+                        editKategoriSelect.add(option3);
+
+                        // Populate category lists for management
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        listItem.innerHTML = `
+                            ${category.name}
+                            <div>
+                                <button onclick="showEditCategoryModal('${child.key}', '${category.name}', '${category.type}')" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button onclick="deleteCategory('${child.key}')" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        `;
+
+                        if (category.type === 'pemasukan') {
+                            pemasukanList.appendChild(listItem);
+                        } else {
+                            pengeluaranList.appendChild(listItem);
+                        }
+                    });
+                } else {
+                    addDefaultCategories(); // Add default categories if none exist for this user
+                    pemasukanList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
+                    pengeluaranList.innerHTML = '<li class="list-group-item text-center py-3">Tidak ada kategori.</li>';
+                }
             });
         }
 
         // Add default categories
         function addDefaultCategories() {
-            if (!currentUser || !currentUser.uid) { // Tambahkan cek currentUser.uid
-                console.error("addDefaultCategories: currentUser or UID is null/undefined.");
-                return;
-            }
-            console.log("Mencoba menambahkan kategori default untuk UID:", currentUser.uid);
+            if (!currentUser) return;
+
             const defaultCategories = [
                 { name: 'Gaji', type: 'pemasukan' },
+                { name: 'Omset', type: 'pemasukan' },
                 { name: 'Bonus', type: 'pemasukan' },
                 { name: 'Investasi', type: 'pemasukan' },
                 { name: 'Lainnya', type: 'pemasukan' },
@@ -1210,12 +1175,10 @@
             }, (error, committed, snapshot) => {
                 if (error) {
                     console.error("Transaction failed abnormally!", error);
-                    showMessageBox("Gagal menambahkan kategori default: " + error.message, "danger");
                 } else if (committed) {
                     console.log("Default categories added successfully!");
-                    showMessageBox("Kategori default berhasil ditambahkan!", "success");
                 } else {
-                    console.log("Default categories already exist, no new categories added by transaction.");
+                    console.log("Default categories already exist, no new categories added.");
                 }
             });
         }
@@ -1235,14 +1198,9 @@
                 db.ref("categories/" + currentUser.uid).push({
                     name: name,
                     type: type
-                })
-                .then(() => {
-                    e.target.reset();
-                    showMessageBox('Kategori berhasil ditambahkan!', 'success');
-                })
-                .catch(error => {
-                    showMessageBox('Gagal menambahkan kategori: ' + error.message, 'danger');
                 });
+                e.target.reset();
+                showMessageBox('Kategori berhasil ditambahkan!', 'success');
             } else {
                 showMessageBox('Nama kategori tidak boleh kosong!', 'warning');
             }
@@ -1269,15 +1227,11 @@
                 db.ref("categories/" + currentUser.uid + "/" + id).update({
                     name: name,
                     type: type
-                })
-                .then(() => {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
-                    modal.hide();
-                    showMessageBox('Kategori berhasil diperbarui!', 'success');
-                })
-                .catch(error => {
-                    showMessageBox('Gagal memperbarui kategori: ' + error.message, 'danger');
                 });
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
+                modal.hide();
+                showMessageBox('Kategori berhasil diperbarui!', 'success');
             } else {
                 showMessageBox('Nama kategori tidak boleh kosong!', 'warning');
             }
@@ -1439,8 +1393,11 @@
             const categorySelect = document.getElementById('editKategori');
             categorySelect.innerHTML = '<option value="">Pilih Kategori</option>'; // Clear existing options
             allCategories.forEach(cat => {
-                const option = new Option(cat.name, cat.name);
-                categorySelect.add(option);
+                // Only show categories relevant to the transaction type (income/expense)
+                if (cat.type === transaction.type) {
+                    const option = new Option(cat.name, cat.name);
+                    categorySelect.add(option);
+                }
             });
             categorySelect.value = transaction.category || '';
 
@@ -1453,7 +1410,7 @@
             if (!currentUser) return;
             const id = document.getElementById('editId').value;
             const date = document.getElementById('editTanggal').value;
-            const type = document.getElementById('editTipe').value; // Perbaikan: hapus .value.value
+            const type = document.getElementById('editTipe').value;
             const category = document.getElementById('editKategori').value;
             const amount = parseInt(document.getElementById('editJumlah').value);
             const note = document.getElementById('editKeterangan').value;
@@ -2288,7 +2245,7 @@
 
             filtered.forEach((t, index) => {
                 message += `${index + 1}. ${formatDate(t.date)} - ${t.type === 'pemasukan' ? '⬇️' : '⬆️'} ${t.category || ''}\n`;
-                message += `     Rp${t.amount.toLocaleString('id-ID')}`;
+                message += `    Rp${t.amount.toLocaleString('id-ID')}`;
                 if (t.note) message += ` (${t.note})`;
                 message += `\n`;
             });
@@ -2310,11 +2267,11 @@
             allDebts.forEach((d, index) => {
                 const status = d.status === 'lunas' ? '✅ Lunas' : '❌ Belum Lunas';
                 message += `${index + 1}. ${d.name} (${d.type === 'hutang' ? 'Hutang' : 'Piutang'})\n`;
-                message += `     Jumlah: Rp${d.amount.toLocaleString('id-ID')}\n`;
-                if (d.installment) message += `     Cicilan: Rp${d.installment.toLocaleString('id-ID')}/bulan\n`;
-                message += `     Jatuh Tempo: ${formatDate(d.dueDate)}\n`;
-                message += `     Status: ${status}\n`;
-                if (d.note) message += `     Catatan: ${d.note}\n`;
+                message += `    Jumlah: Rp${d.amount.toLocaleString('id-ID')}\n`;
+                if (d.installment) message += `    Cicilan: Rp${d.installment.toLocaleString('id-ID')}/bulan\n`;
+                message += `    Jatuh Tempo: ${formatDate(d.dueDate)}\n`;
+                message += `    Status: ${status}\n`;
+                if (d.note) message += `    Catatan: ${d.note}\n`;
                 message += `\n`;
             });
 
@@ -2434,96 +2391,5 @@
             };
         }
     </script>
-
-<!-- Tombol Migrasi Manual -->
-<button id="migrateBtn" style="position: fixed; bottom: 10px; right: 10px; padding: 10px 15px; background: red; color: white; border: none; border-radius: 5px; z-index:999;">
-  🔁 Pindah Kategori
-</button>
-
-<script>
-  document.getElementById("migrateBtn").addEventListener("click", function () {
-    if (!auth.currentUser) {
-      alert("Login dulu untuk memigrasikan data.");
-      return;
-    }
-
-    const uid = auth.currentUser.uid;
-    const rootRef = db.ref(uid); // Data lama
-    const targetRef = db.ref("categories/" + uid); // Target lokasi baru
-
-    rootRef.once("value").then(snapshot => {
-      if (!snapshot.exists()) {
-        alert("Tidak ada data kategori di root UID untuk dipindahkan.");
-        return;
-      }
-
-      const allData = snapshot.val();
-      const migrated = {};
-
-      for (let key in allData) {
-        const item = allData[key];
-        if (
-          typeof item === "object" &&
-          item.name &&
-          item.type &&
-          typeof item.name === "string" &&
-          typeof item.type === "string"
-        ) {
-          migrated[key] = item;
-        }
-      }
-
-      if (Object.keys(migrated).length === 0) {
-        alert("Tidak ditemukan data kategori valid untuk dipindahkan.");
-        return;
-      }
-
-      targetRef.update(migrated, (error) => {
-        if (error) {
-          alert("❌ Gagal memindahkan: " + error.message);
-        } else {
-          alert("✅ Berhasil memindahkan kategori ke: categories/" + uid);
-          document.getElementById("migrateBtn").remove();
-        }
-      });
-    });
-  });
-</script>
-
-
-<script>
-document.getElementById("formKategori").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const nama = document.getElementById("namaKategori").value.trim();
-  const jenis = document.getElementById("jenisKategori").value;
-
-  if (!auth.currentUser) {
-    alert("Harap login terlebih dahulu.");
-    return;
-  }
-
-  if (nama === "" || !jenis) {
-    alert("Isi semua field.");
-    return;
-  }
-
-  const uid = auth.currentUser.uid;
-  const kategoriBaru = {
-    name: nama,
-    type: jenis
-  };
-
-  db.ref("categories/" + uid).push(kategoriBaru, function (error) {
-    if (error) {
-      alert("Gagal menyimpan kategori: " + error.message);
-    } else {
-      alert("✅ Kategori berhasil disimpan.");
-      document.getElementById("formKategori").reset();
-    }
-  });
-});
-</script>
-
 </body>
 </html>
